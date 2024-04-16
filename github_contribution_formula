@@ -1,0 +1,27 @@
+lets(
+ weeksNum,ifs(prop("period")== "month",5,prop("period")=="quarter",13, prop("period")== "half_year", 26, prop("period")== "year",52, 52),
+ dateFormat, "MMMM D, Y",
+ weekLabels, ["Sun", "Mon", "Tue", "Wen", "Thu", "Fri", "Sat", "Sun"].map(current.style("gray_background","gray","c")),
+ readingRecords, prop("habit_tracker").map(formatDate(current.prop("date"),dateFormat)),
+ today, day(now()),
+ startOfthisWeek, if(today==7,now(),dateSubtract(now(),today,"days")),
+ firstSunDate, dateSubtract(startOfthisWeek, weeksNum, "weeks"),
+ placeHolder,["M","M","M"].map(" ".style("gray_background","gray","c","b")).join(""),
+ monthLabel, repeat(" ",weeksNum+1).split("")
+ .map(dateAdd(firstSunDate,index,"weeks"))
+ .map(ifs(date(current)<=4, formatDate(current,"MMMM").split("").at(0), 
+  date(dateAdd(current,3,"days"))<=4, formatDate(dateAdd(current,3,"days"),"MMMM").split("").at(0),
+  " "))
+ .map(current.style("white_background","gray","c","b"))
+ .join(" "),
+ grid, [0,1,2,3,4,5,6]
+   .map(repeat(current,if(today>=current && today!=7,weeksNum+1,weeksNum)).split("")
+    .map(dateAdd(firstSunDate, index*7 + toNumber(current), "days"))
+    .map(formatDate(current,dateFormat))
+    .map(if(includes(readingRecords,current),prop("dot_"), " ").style("green_background","green","c"))
+    .join(" ")
+ )
+ .map(weekLabels.at(index) +" "+ current)
+ .join("\n"),
+ placeHolder+" "+ monthLabel + "\n"+grid
+)
